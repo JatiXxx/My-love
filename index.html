@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Відлік часу</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+      color: #fff;
+      text-align: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(255, 20, 147, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 105, 180, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .container {
+      background: rgba(15, 15, 35, 0.8);
+      padding: 60px 70px;
+      border-radius: 25px;
+      box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      max-width: 800px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #ff1493, #da70d6, #9370db, #ff69b4);
+      border-radius: 25px;
+      z-index: -1;
+      opacity: 0.3;
+      filter: blur(20px);
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      margin-bottom: 50px;
+      letter-spacing: 1px;
+      font-weight: 300;
+      background: linear-gradient(45deg, #ff69b4, #da70d6, #ff1493);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+    }
+
+    .timer {
+      display: flex;
+      gap: 25px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .time-box {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+      padding: 30px 25px;
+      border-radius: 20px;
+      min-width: 130px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .time-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.6s;
+    }
+
+    .time-box:hover::before {
+      left: 100%;
+    }
+
+    .time-box:hover {
+      transform: translateY(-8px) scale(1.03);
+      background: linear-gradient(145deg, rgba(255, 105, 180, 0.15), rgba(138, 43, 226, 0.15));
+      box-shadow: 
+        0 20px 40px rgba(255, 105, 180, 0.3),
+        0 0 0 1px rgba(255, 105, 180, 0.2);
+    }
+
+    .number {
+      font-size: 3.2rem;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 12px;
+      background: linear-gradient(45deg, #ff69b4, #da70d6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+      transition: all 0.3s ease;
+    }
+
+    .time-box:hover .number {
+      transform: scale(1.1);
+      text-shadow: 0 0 30px rgba(255, 105, 180, 0.8);
+    }
+
+    .label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #e6e6fa;
+      font-weight: 500;
+    }
+
+    .player {
+      margin-top: 50px;
+    }
+
+    .play-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: none;
+      font-size: 2.2rem;
+      background: linear-gradient(135deg, #ff69b4, #da70d6, #9370db);
+      color: white;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 
+        0 10px 30px rgba(255, 105, 180, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .play-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s;
+    }
+
+    .play-btn:hover::before {
+      transform: translateX(100%);
+    }
+
+    .play-btn:hover {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 
+        0 20px 40px rgba(255, 105, 180, 0.6),
+        0 0 0 1px rgba(255, 105, 180, 0.3);
+    }
+
+    .play-btn:active {
+      transform: scale(0.95);
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { 
+        box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+        transform: scale(1);
+      }
+      50% { 
+        box-shadow: 0 20px 50px rgba(255, 105, 180, 0.8);
+        transform: scale(1.05);
+      }
+      100% { 
+        box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+        transform: scale(1);
+      }
+    }
+
+    /* Анімація появи елементів */
+    .time-box {
+      animation: fadeInUp 0.8s ease-out forwards;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .time-box:nth-child(1) { animation-delay: 0.1s; }
+    .time-box:nth-child(2) { animation-delay: 0.2s; }
+    .time-box:nth-child(3) { animation-delay: 0.3s; }
+    .time-box:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Адаптивність */
+    @media (max-width: 768px) {
+      .container {
+        padding: 40px 30px;
+        margin: 20px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .timer {
+        gap: 15px;
+      }
+      
+      .time-box {
+        min-width: 100px;
+        padding: 20px 15px;
+      }
+      
+      .number {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>До зустрічі залишилось:</h1>
+    <div class="timer" id="countdown">
+      <div class="time-box">
+        <span class="number" id="days">0</span>
+        <span class="label">Днів</span>
+      </div>
+      <div class="time-box">
+        <span class="number" id="hours">0</span>
+        <span class="label">Годин</span>
+      </div>
+      <div class="time-box">
+        <span class="number" id="minutes">0</span>
+        <span class="label">Хвилин</span>
+      </div>
+      <div class="time-box">
+        <span class="number" id="seconds">0</span>
+        <span class="label">Секунд</span>
+      </div>
+    </div>
+
+    <!-- 🎵 Плеєр -->
+    <div class="player">
+      <button class="play-btn" id="playBtn">▶</button>
+      <audio id="audio" src="vesna.mp3"></audio>
+    </div>
+  </div>
+
+  <script>
+    const targetDate = new Date("August 22, 2025 12:10:00").getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const diff = targetDate - now;
+
+      if (diff <= 0) {
+        document.getElementById("countdown").innerHTML = "<h2>💖 Час настав! 💖</h2>";
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById("days").innerText = days;
+      document.getElementById("hours").innerText = hours;
+      document.getElementById("minutes").innerText = minutes;
+      document.getElementById("seconds").innerText = seconds;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // 🎵 Плеєр
+    const playBtn = document.getElementById("playBtn");
+    const audio = document.getElementById("audio");
+    let isPlaying = false;
+
+    playBtn.addEventListener("click", () => {
+      if (!isPlaying) {
+        audio.play();
+        playBtn.textContent = "⏸";
+        playBtn.classList.add("pulse");
+      } else {
+        audio.pause();
+        playBtn.textContent = "▶";
+        playBtn.classList.remove("pulse");
+      }
+      isPlaying = !isPlaying;
+    });
+  </script>
+</body>
+</html>
